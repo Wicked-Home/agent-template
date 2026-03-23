@@ -160,6 +160,7 @@ Check `.gitignore` includes common patterns:
 - `.env`, `*.key`, `*.pem` (secrets)
 - `.beads/` (bd internal state — should NOT be committed)
 - `.claude/manager-session.md` (manager session state — local only, not committed)
+- `.claude/design-feedback-*.md` (design session scratch files — local only, not committed)
 
 If `.gitignore` is missing or doesn't cover these → create/update it.
 

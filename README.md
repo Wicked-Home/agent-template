@@ -45,6 +45,11 @@ agent-template/
 │   └── commands/
 │       └── add-agents.md           ← Claude Code slash command: /add-agents
 └── agents/
+    ├── design-facilitator.md       ← Runs multi-agent design session, synthesizes into design.md
+    ├── design-product.md           ← Product specialist (spawned by facilitator)
+    ├── design-architect.md         ← Architecture specialist (spawned by facilitator)
+    ├── design-critic.md            ← Devil's advocate (spawned by facilitator)
+    ├── design-planner.md           ← Reads finished design.md, creates GitHub issue backlog
     ├── initiator.md                ← Bootstraps + validates project setup (run first)
     ├── manager.md                  ← Triages backlog, sets priorities, drives hands-off loop
     ├── coordinator.md              ← Orchestrates build → test → fix loop (one epic)
@@ -52,8 +57,7 @@ agent-template/
     ├── example-backend-api.md      ← Filled-in example of code-agent.md (Python/FastAPI)
     ├── test-writer.md              ← Reviews coverage, writes edge case tests
     ├── test-runner.md              ← Executes test suite, reports results (read-only)
-    ├── agent-auditor.md            ← Audits agents for accuracy, proposes new agents
-    └── design-planner.md           ← Reads a design doc and creates GitHub issue backlog
+    └── agent-auditor.md            ← Audits agents for accuracy, proposes new agents
 ```
 
 ## How to Customize
@@ -117,51 +121,64 @@ The workflow doc and all agents reference bd commands. If your project has a dif
 ## Architecture
 
 ```
-    ┌─────────────────┐
-    │ design-planner  │  ← run at project start: spec → GitHub issues
-    └────────┬────────┘
-             │ creates issues in GitHub
-             ▼
-    ┌──────────────┐
-    │  initiator   │  ← run once to validate tooling setup
-    └──────┬───────┘
-             │
-             ▼
-    ┌──────────────┐
-    │   manager    │  ← hands-off loop: triage → prioritize → delegate → repeat
-    └──────┬───────┘
-           │ spawns coordinator per epic
-           ▼
-    ┌──────────────┐
-    │ coordinator  │  ← orchestrates one epic end-to-end
-    └──────┬───────┘
-           │
-  ┌────────┼──────────────┐
-  │        │              │
-  Build    Harden    Validate
-  │        │              │
-┌─┴──────┐ ┌┴───────────┐ ┌┴───────────┐
-│ code   │ │ test-writer │ │ test-runner │
-│ agent  │ │             │ │ (read-only) │
-└─┬──────┘ └┬───────────┘ └┬───────────┘
-  │        │              │
-  └────────┼──────────────┘
-           │
-    Fails? ─┤── Yes → fix loop (max 3×)
-           │            └── still failing → escalate to manager → user
-    No → PR + report back to manager
+              ┌──────────────────────┐
+              │  design-facilitator  │  ← turn an idea into a design doc
+              └──────────┬───────────┘
+    spawns in sequence   │
+  ┌──────────────────────┼───────────────────────┐
+  ▼                      ▼                        ▼
+┌────────────────┐  ┌──────────────────┐  ┌────────────────┐
+│ design-product │  │ design-architect │  │ design-critic  │
+└───────┬────────┘  └────────┬─────────┘  └───────┬────────┘
+        └──── feedback ──────┴──── feedback ────────┘
+                             │ synthesize (up to 3 rounds)
+                             ▼
+                        design.md
+                             │
+                             ▼
+                   ┌─────────────────┐
+                   │  design-planner │  ← design.md → GitHub issues
+                   └────────┬────────┘
+                            │
+                            ▼
+                   ┌──────────────┐
+                   │  initiator   │  ← validate tooling (run once)
+                   └──────┬───────┘
+                          │
+                          ▼
+                   ┌──────────────┐
+                   │   manager    │  ← triage → prioritize → delegate → repeat
+                   └──────┬───────┘
+                          │ one issue at a time
+                          ▼
+                   ┌──────────────┐
+                   │ coordinator  │  ← orchestrates one epic end-to-end
+                   └──────┬───────┘
+                          │
+            ┌─────────────┼──────────────┐
+          Build        Harden        Validate
+            │             │              │
+       ┌────┴───┐  ┌──────┴──────┐  ┌───┴────────┐
+       │ code   │  │ test-writer │  │ test-runner │
+       │ agent  │  │             │  │ (read-only) │
+       └────────┘  └─────────────┘  └────────────┘
+                          │
+                  Fails? ─┤── fix loop (max 3×)
+                  No → PR + report back to manager
 
     ┌────────────────┐
-    │ agent-auditor  │  ← called when no agent fits,
-    │ (periodic)     │    or periodically to keep agents current
+    │ agent-auditor  │  ← periodic: keeps agent definitions current
     └────────────────┘
 ```
 
 ## Invoking
 
 ```
-# Turn a design doc into a GitHub issue backlog
-@"design-planner (agent)" read docs/design.md and create issues
+# Turn an idea into a design document (collaborative multi-agent session)
+@"design-facilitator (agent)" I want to build a task management app for small teams
+
+# Turn a finished design doc into a GitHub issue backlog
+@"design-planner (agent)" read design.md and create issues
 
 # First-time setup
 @"initiator (agent)" validate this project's setup

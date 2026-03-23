@@ -125,6 +125,56 @@ Keep GitHub comments **concise and human-readable** — no internal bead IDs or 
 
 ---
 
+## Design Session (Multi-Agent)
+
+The design session turns a rough idea into a well-rounded design document through structured debate between specialist agents.
+
+```
+@"design-facilitator (agent)" I want to build <idea>
+```
+
+Or with existing notes:
+```
+@"design-facilitator (agent)" read my-notes.md and design this
+```
+
+### How it works
+
+```
+Facilitator creates initial draft (design.md)
+         │
+         ▼ Round 1
+  ┌──────┴───────────────────────────────────┐
+  │  design-product   → .claude/design-feedback-product.md   │
+  │  design-architect → .claude/design-feedback-architect.md │
+  │  design-critic    → .claude/design-feedback-critic.md    │
+  └──────────────────────────────────────────┘
+         │
+         ▼
+  Facilitator reads all feedback, synthesizes into updated design.md
+  Decisions logged. Open questions captured.
+         │
+         ├── Substantive changes made? → Round 2 (max 3 rounds)
+         │
+         └── Stable or round 3 reached → Final design.md produced
+```
+
+### What each specialist focuses on
+
+| Specialist | Focus |
+|---|---|
+| `design-product` | User needs, measurable goals, scope, user stories, success metrics |
+| `design-architect` | System design, data model, component boundaries, tech stack, scalability |
+| `design-critic` | Hidden assumptions, contradictions, missing requirements, risks |
+
+### Output
+
+A `design.md` in the project root, ready to hand to `design-planner` to create GitHub issues.
+
+Intermediate feedback files (`.claude/design-feedback-*.md`) are cleaned up automatically.
+
+---
+
 ## Manager Workflow (Hands-off Loop)
 
 The manager is the entry point for fully autonomous operation. Invoke it once and it will triage the backlog, set priorities, and drive the coordinator through issues one at a time until the backlog is empty or it hits something that needs a human decision.

@@ -31,17 +31,34 @@ After install, start a new session (agents load at startup), then validate:
 
 ## Agent Architecture
 
-Eight specialized agents cover the full development lifecycle, from spec to shipped:
+Twelve specialized agents cover the full development lifecycle, from idea to shipped:
 
+### Design phase
 | Agent | Role | Model |
 |---|---|---|
-| **design-planner** | Reads a design doc and creates structured GitHub issue backlog | opus |
+| **design-facilitator** | Runs a multi-agent design session; synthesizes specialist debate into a design doc | opus |
+| **design-product** | Product specialist — user needs, scope, success metrics (spawned by facilitator) | sonnet |
+| **design-architect** | Architecture specialist — system design, data model, interfaces (spawned by facilitator) | sonnet |
+| **design-critic** | Devil's advocate — assumptions, contradictions, risks, missing requirements (spawned by facilitator) | sonnet |
+
+### Planning phase
+| Agent | Role | Model |
+|---|---|---|
+| **design-planner** | Reads a finished design doc and creates structured GitHub issue backlog | opus |
 | **initiator** | One-time project setup validation and bootstrapping | sonnet |
+
+### Execution phase
+| Agent | Role | Model |
+|---|---|---|
 | **manager** | Triages backlog, sets priorities, delegates to coordinator in a hands-off loop | opus |
 | **coordinator** | Orchestrates build-test-fix cycle for a single epic | sonnet |
 | **code-agent** | Template for domain-specific implementation agents | sonnet |
 | **test-writer** | Hardens coverage with edge cases and integration tests | sonnet |
 | **test-runner** | Executes test suite (read-only, no code changes) | sonnet |
+
+### Maintenance
+| Agent | Role | Model |
+|---|---|---|
 | **agent-auditor** | Audits agent definitions for drift and proposes new agents | sonnet |
 
 ### Workflow Cycle (via Coordinator)
