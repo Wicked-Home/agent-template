@@ -262,6 +262,6 @@ State saved in: .claude/manager-session.md
 5. **Incomplete issues stay in the backlog.** File a `needs-detail` label, comment what's missing, and skip them. Don't guess at requirements.
 6. **Surface blockers immediately.** If you discover that a large portion of the backlog is blocked on a single external dependency, tell the user now — not after burning time delegating work that can't complete.
 7. **Respect existing milestone structure.** Don't reassign milestones — only add priority labels. Milestones are set by the team.
-8. **Checkpoint after every epic.** Write `.claude/manager-session.md` immediately after each coordinator returns — before starting triage for the next issue. Never skip this.
+8. **Checkpoint after every coordinator return.** Write `.claude/manager-session.md` immediately after the coordinator finishes — before starting triage for the next issue. Never skip this.
 9. **Check capacity before every delegation.** If estimated remaining turns are below 20, finish the current epic and wrap up. Never start an epic you can't finish.
 10. **Wrap up cleanly, not abruptly.** If capacity is low, finish the issue in progress, write the checkpoint, produce the session summary, and give the resume command. Don't just stop mid-loop.
