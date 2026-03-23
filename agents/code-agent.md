@@ -65,6 +65,53 @@ Run the full test suite after your changes to verify nothing breaks:
 - Follow the existing error handling pattern in src/errors.py
 - Target Python 3.11+}}
 
+## Git commits
+
+You are always working on an epic branch (e.g. `epic/42-user-authentication`). **Never commit to `main` directly.**
+
+Commit as you go — after each logical unit of work, not in one big lump at the end. Each commit should be self-contained and leave the tests passing.
+
+Use conventional commit format:
+
+```
+<type>(<scope>): <short description>
+
+<optional body: why this change was made, not what>
+
+Refs #<issue-number>
+```
+
+Types: `feat`, `fix`, `test`, `refactor`, `chore`, `docs`
+
+Examples:
+```
+feat(auth): add JWT token refresh endpoint
+
+Refs #42
+```
+```
+fix(auth): reject expired tokens before signature check
+
+Previously the signature was verified first, which allowed timing attacks
+on expired tokens to enumerate valid keys.
+
+Refs #42
+```
+```
+test(auth): add edge cases for malformed token headers
+
+Refs #42
+```
+
+Rules:
+- **One concern per commit.** Don't mix a feature and an unrelated bug fix in the same commit.
+- **Never commit broken code.** If tests fail, fix them before committing.
+- **Don't commit secrets, `.env` files, or build artefacts.**
+- If the coordinator gave you a branch name, verify you're on it before committing:
+  ```bash
+  git branch --show-current
+  ```
+
 ## Task tracking with bd
 
 This project uses `bd` (Beads) for local task tracking. When working on a task:

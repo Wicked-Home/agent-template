@@ -392,6 +392,106 @@ bd ready
 
 ---
 
+## Git Workflow
+
+### Branches
+
+One branch per epic, named after the GitHub Issue it implements:
+
+```
+epic/<issue-number>-<kebab-slug>
+
+# Examples
+epic/42-user-authentication
+epic/57-csv-export
+epic/103-rate-limiting
+```
+
+Always branch from an up-to-date `main`:
+```bash
+git checkout main && git pull
+git checkout -b epic/<number>-<slug>
+```
+
+Never reuse a branch across multiple epics. When an epic is done and the PR is merged, the branch is retired.
+
+### Commits
+
+Commit frequently — after each logical unit of work, not in one lump at the end. Use conventional commit format:
+
+```
+<type>(<scope>): <short description>
+
+<optional body explaining why, not what>
+
+Refs #<issue-number>
+```
+
+| Type | When to use |
+|---|---|
+| `feat` | New behaviour visible to users or callers |
+| `fix` | Bug correction |
+| `test` | Adding or fixing tests only |
+| `refactor` | Code restructuring with no behaviour change |
+| `chore` | Build, config, dependency updates |
+| `docs` | Documentation only |
+
+Rules:
+- One concern per commit — don't mix a feature with an unrelated fix
+- Never commit broken code; tests must pass before committing
+- Never commit to `main` directly
+- Never commit secrets, `.env` files, or build artefacts
+
+### When to open a PR
+
+Open a PR when **any** of these are true:
+
+| Trigger | Check |
+|---|---|
+| Epic complete | All tasks done, all tests green |
+| Branch size | 5+ commits on the branch (`git log --oneline main..HEAD \| wc -l`) |
+| Topic drift | The next issue is a different feature area — ship before switching |
+
+When in doubt, PR sooner. Small, focused PRs are easier to review than large ones.
+
+### PR format
+
+```
+Title: <Epic title — matches the GitHub Issue title>
+
+## Summary
+- <What was built>
+- <Key design decision, if any>
+
+## Issues closed
+- Closes #<number>
+- Closes #<number>  (if multiple issues were resolved)
+
+## Test results
+All <N> tests passing.
+
+## Notes
+<Known limitations, follow-up issues filed, anything a reviewer should know>
+```
+
+Rules:
+- **One topic per PR.** Never mix changes from different epics. If unrelated commits crept onto the branch, move them out before opening.
+- **Link every issue** with `Closes #N` so GitHub auto-closes on merge.
+- **PR title = epic/issue title.** Consistent naming makes history readable.
+- Open ready-to-review PRs, not drafts, when the work is complete.
+
+### After merge
+
+Delete the branch after merge to keep the remote clean:
+```bash
+git branch -d epic/<number>-<slug>
+git push origin --delete epic/<number>-<slug>
+```
+
+Then start the next epic from a fresh `git pull` on `main`.
+
+---
+
 ## Rules
 
 - **Never put implementation details in GitHub comments** — keep them in bd.

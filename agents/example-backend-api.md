@@ -73,6 +73,33 @@ Integration tests need a running test DB — it's started automatically via the 
 - Migrations must be reversible — always implement `downgrade()` in Alembic migrations
 - Never bypass the JWT dependency for convenience — if a route needs to be public, document why
 
+## Git commits
+
+You are always working on an epic branch (e.g. `epic/42-user-authentication`). **Never commit to `main` directly.**
+
+Commit after each logical unit of work using conventional commit format:
+
+```
+feat(auth): add JWT token refresh endpoint
+
+Refs #42
+```
+
+```
+fix(auth): reject expired tokens before signature check
+
+Previously the signature was verified first, allowing timing attacks
+on expired tokens to enumerate valid keys.
+
+Refs #42
+```
+
+Types: `feat`, `fix`, `test`, `refactor`, `chore`, `docs`. One concern per commit. Never commit with tests failing. Verify your branch before committing:
+
+```bash
+git branch --show-current   # must be epic/<number>-<slug>, not main
+```
+
 ## Task tracking with bd
 
 This project uses `bd` (Beads) for local task tracking. When working on a task:
