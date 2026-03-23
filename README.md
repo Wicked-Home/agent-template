@@ -46,7 +46,8 @@ agent-template/
 │       └── add-agents.md           ← Claude Code slash command: /add-agents
 └── agents/
     ├── initiator.md                ← Bootstraps + validates project setup (run first)
-    ├── coordinator.md              ← Orchestrates build → test → fix loop
+    ├── manager.md                  ← Triages backlog, sets priorities, drives hands-off loop
+    ├── coordinator.md              ← Orchestrates build → test → fix loop (one epic)
     ├── code-agent.md               ← Template for domain-specific code agents
     ├── example-backend-api.md      ← Filled-in example of code-agent.md (Python/FastAPI)
     ├── test-writer.md              ← Reviews coverage, writes edge case tests
@@ -119,15 +120,20 @@ The workflow doc and all agents reference bd commands. If your project has a dif
     ┌─────────────────┐
     │ design-planner  │  ← run at project start: spec → GitHub issues
     └────────┬────────┘
-             │ creates epics + tasks in GitHub
+             │ creates issues in GitHub
              ▼
     ┌──────────────┐
     │  initiator   │  ← run once to validate tooling setup
     └──────┬───────┘
-           │ validates project, then hands off to:
+             │
+             ▼
+    ┌──────────────┐
+    │   manager    │  ← hands-off loop: triage → prioritize → delegate → repeat
+    └──────┬───────┘
+           │ spawns coordinator per epic
            ▼
     ┌──────────────┐
-    │ coordinator  │  ← orchestrates each issue
+    │ coordinator  │  ← orchestrates one epic end-to-end
     └──────┬───────┘
            │
   ┌────────┼──────────────┐
@@ -142,8 +148,8 @@ The workflow doc and all agents reference bd commands. If your project has a dif
   └────────┼──────────────┘
            │
     Fails? ─┤── Yes → fix loop (max 3×)
-           │
-    No → report & close
+           │            └── still failing → escalate to manager → user
+    No → PR + report back to manager
 
     ┌────────────────┐
     │ agent-auditor  │  ← called when no agent fits,
@@ -160,7 +166,10 @@ The workflow doc and all agents reference bd commands. If your project has a dif
 # First-time setup
 @"initiator (agent)" validate this project's setup
 
-# Full cycle via coordinator
+# Hands-off: triage backlog, set priorities, and drive all implementation
+@"manager (agent)" triage the backlog and start working through it
+
+# Full cycle for one issue via coordinator (without manager)
 @"coordinator (agent)" implement issue #42
 
 # Individual agents directly

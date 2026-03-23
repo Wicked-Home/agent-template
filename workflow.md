@@ -125,6 +125,78 @@ Keep GitHub comments **concise and human-readable** — no internal bead IDs or 
 
 ---
 
+## Manager Workflow (Hands-off Loop)
+
+The manager is the entry point for fully autonomous operation. Invoke it once and it will triage the backlog, set priorities, and drive the coordinator through issues one at a time until the backlog is empty or it hits something that needs a human decision.
+
+```
+@"manager (agent)" triage the backlog and start working through it
+```
+
+### What the manager does
+
+```
+Phase 1 — Triage
+  │  Pull all open issues
+  │  Flag incomplete issues (needs-detail label + comment)
+  │  Close stale issues (>30 days, no activity)
+  │  Close duplicates
+  │  File missing issues discovered in comments/references
+  │
+  ▼
+Phase 2 — Prioritize
+  │  Assign P0/P1/P2/P3 label to every actionable issue
+  │  Adjust mis-prioritized issues, leave comment explaining change
+  │
+  ▼
+Phase 3 — Dependencies
+  │  Identify blocked issues
+  │  Comment on blocked issues so state is visible
+  │
+  ▼
+Phase 4 — Delegate
+  │  Pick highest-priority unblocked issue
+  │  Spawn coordinator for that issue
+  │  Wait for coordinator to finish and report back
+  │
+  ▼
+Phase 5 — Re-evaluate
+  │  Confirm issue closed
+  │  Note any new issues filed by coordinator
+  │  Loop back to Phase 1
+  │
+  └── Until: backlog empty | all remaining blocked | escalation needed
+```
+
+### Priority labels
+
+| Label | When |
+|---|---|
+| `P0-critical` | Production broken, security issue, blocks everything |
+| `P1-high` | Core feature for next milestone, unblocks other issues |
+| `P2-medium` | Valuable but not blocking |
+| `P3-low` | Nice to have, polish |
+
+### Stop conditions
+
+The manager stops and reports when:
+- Backlog is empty
+- All remaining issues are blocked or need detail
+- The coordinator escalated (hit its 3-cycle fix limit)
+- A priority decision has real architectural implications
+
+When stopped, the manager produces a session summary: what was completed, what remains, why it stopped, and what the user should do next.
+
+### When to use manager vs. coordinator directly
+
+| Situation | Use |
+|---|---|
+| You want to hand off the whole backlog and check back later | `manager` |
+| You want to implement one specific issue now | `coordinator` |
+| You want to prioritize/triage without implementing anything | `manager` — it will stop after triage if you tell it to |
+
+---
+
 ## Coordinator Workflow (Multi-Agent)
 
 When working on an issue that involves implementation, testing, and iteration, use the **coordinator agent** to orchestrate the full cycle. The coordinator delegates to specialized agents and manages the feedback loop between them.

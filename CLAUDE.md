@@ -31,13 +31,14 @@ After install, start a new session (agents load at startup), then validate:
 
 ## Agent Architecture
 
-Seven specialized agents cover the full development lifecycle, from spec to shipped:
+Eight specialized agents cover the full development lifecycle, from spec to shipped:
 
 | Agent | Role | Model |
 |---|---|---|
 | **design-planner** | Reads a design doc and creates structured GitHub issue backlog | opus |
 | **initiator** | One-time project setup validation and bootstrapping | sonnet |
-| **coordinator** | Master orchestrator — routes work, manages build-test-fix cycles | sonnet |
+| **manager** | Triages backlog, sets priorities, delegates to coordinator in a hands-off loop | opus |
+| **coordinator** | Orchestrates build-test-fix cycle for a single epic | sonnet |
 | **code-agent** | Template for domain-specific implementation agents | sonnet |
 | **test-writer** | Hardens coverage with edge cases and integration tests | sonnet |
 | **test-runner** | Executes test suite (read-only, no code changes) | sonnet |
