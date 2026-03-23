@@ -4,40 +4,62 @@ A reusable multi-agent system with a coordinator, specialized code agents, test 
 
 ## Quick Start
 
-1. Copy the `agents/` folder into your project's `.claude/agents/` directory
-2. Copy `workflow.md` to your project root (or wherever your team docs live)
-3. Run the **initiator** agent to validate your setup and catch missing pieces
-4. Customize each agent file — replace the placeholder sections marked with `{{...}}`
+**From a terminal** — run this in your project folder:
 
 ```bash
-# Example setup
-cp -r agents/ /path/to/your-project/.claude/agents/
-cp workflow.md /path/to/your-project/
-
-# Then in Claude Code:
-@"initiator (agent)" validate this project's setup
+curl -fsSL https://raw.githubusercontent.com/Wicked-Home/agent-template/main/install.sh | bash
 ```
+
+**From inside a Claude Code session** — add the `/add-agents` command once to your global commands:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Wicked-Home/agent-template/main/.claude/commands/add-agents.md \
+  >> ~/.claude/commands/add-agents.md
+```
+
+Then in any project session:
+
+```
+/add-agents
+```
+
+Both do the same thing: copy agents, copy `workflow.md`, update `.gitignore`, check for dolt/bd, and print next steps.
+
+After install:
+
+1. Customize `.claude/agents/code-agent.md` — use `example-backend-api.md` as a reference
+2. Update the routing table in `.claude/agents/coordinator.md`
+3. Start a new Claude Code session (agents load at session start), then run:
+   ```
+   @"initiator (agent)" validate this project's setup
+   ```
 
 ## What's Included
 
 ```
 agent-template/
-├── README.md                  ← You are here
-├── workflow.md                ← Full workflow doc (bd + GitHub + coordinator cycle)
+├── README.md                       ← You are here
+├── install.sh                      ← One-command installer (curl | bash)
+├── workflow.md                     ← Full workflow doc (bd + GitHub + coordinator cycle)
+├── .claude/
+│   └── commands/
+│       └── add-agents.md           ← Claude Code slash command: /add-agents
 └── agents/
-    ├── initiator.md           ← Bootstraps + validates project setup (run first)
-    ├── coordinator.md         ← Orchestrates build → test → fix loop
-    ├── code-agent.md          ← Template for domain-specific code agents
-    ├── test-writer.md         ← Reviews coverage, writes edge case tests
-    ├── test-runner.md         ← Executes test suite, reports results (read-only)
-    └── agent-auditor.md       ← Audits agents for accuracy, proposes new agents
+    ├── initiator.md                ← Bootstraps + validates project setup (run first)
+    ├── coordinator.md              ← Orchestrates build → test → fix loop
+    ├── code-agent.md               ← Template for domain-specific code agents
+    ├── example-backend-api.md      ← Filled-in example of code-agent.md (Python/FastAPI)
+    ├── test-writer.md              ← Reviews coverage, writes edge case tests
+    ├── test-runner.md              ← Executes test suite, reports results (read-only)
+    ├── agent-auditor.md            ← Audits agents for accuracy, proposes new agents
+    └── design-planner.md           ← Reads a design doc and creates GitHub issue backlog
 ```
 
 ## How to Customize
 
 ### 1. Create your code agents
 
-`code-agent.md` is a template — copy it once per domain in your project. For example:
+`code-agent.md` is a template — copy it once per domain in your project. See `example-backend-api.md` for a fully filled-in reference. For example:
 
 ```bash
 cp agents/code-agent.md agents/backend-api.md
@@ -94,8 +116,13 @@ The workflow doc and all agents reference bd commands. If your project has a dif
 ## Architecture
 
 ```
+    ┌─────────────────┐
+    │ design-planner  │  ← run at project start: spec → GitHub issues
+    └────────┬────────┘
+             │ creates epics + tasks in GitHub
+             ▼
     ┌──────────────┐
-    │  initiator   │  ← run once at project setup
+    │  initiator   │  ← run once to validate tooling setup
     └──────┬───────┘
            │ validates project, then hands off to:
            ▼
@@ -127,6 +154,9 @@ The workflow doc and all agents reference bd commands. If your project has a dif
 ## Invoking
 
 ```
+# Turn a design doc into a GitHub issue backlog
+@"design-planner (agent)" read docs/design.md and create issues
+
 # First-time setup
 @"initiator (agent)" validate this project's setup
 

@@ -53,14 +53,16 @@ gh issue list --limit 1      # Can list issues?
 - If auth fails → FAIL, tell user to run `gh auth login` or configure a PAT
 - If repo accessible → PASS
 
-### 4. bd (Beads) setup
+### 4. Dolt + bd (Beads) setup
 
 ```bash
+dolt version                 # Check dolt is installed (bd depends on it)
 bd doctor                    # Check bd health
 bd stats                     # Can it run?
 ```
 
-- If `bd` command not found → FAIL, tell user to install bd
+- If `dolt` command not found → FAIL, tell user to install Dolt first (`brew install dolt` on macOS, or the Linux install script from github.com/dolthub/dolt)
+- If `bd` command not found → FAIL, tell user to run `pip install beads-cli` after installing Dolt
 - If bd not initialized in project → run `bd init --stealth`
 - If bd is healthy → PASS
 
