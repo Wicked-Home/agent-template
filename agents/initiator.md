@@ -159,6 +159,7 @@ Check `.gitignore` includes common patterns:
 - `node_modules/` (Node)
 - `.env`, `*.key`, `*.pem` (secrets)
 - `.beads/` (bd internal state — should NOT be committed)
+- `.claude/manager-session.md` (manager session state — local only, not committed)
 
 If `.gitignore` is missing or doesn't cover these → create/update it.
 

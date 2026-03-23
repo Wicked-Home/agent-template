@@ -90,7 +90,7 @@ if [ ! -f ".gitignore" ]; then
   touch .gitignore
 fi
 
-for pattern in ".beads/" "__pycache__/" "*.pyc" "node_modules/" ".env" "*.key" "*.pem"; do
+for pattern in ".beads/" "__pycache__/" "*.pyc" "node_modules/" ".env" "*.key" "*.pem" ".claude/manager-session.md"; do
   if ! grep -qF "$pattern" .gitignore 2>/dev/null; then
     echo "$pattern" >> .gitignore
     gitignore_updated=true
