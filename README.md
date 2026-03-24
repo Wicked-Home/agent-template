@@ -197,6 +197,29 @@ The initiator handles `bd init --stealth` automatically — you don't need to ru
 @"agent-auditor (agent)" audit all agents
 ```
 
+## Human-in-the-Loop: Agent Questions
+
+When the agent system hits a decision it can't make autonomously — ambiguous priorities, contradictory requirements, or a fix cycle that exhausted all retries — it posts a question to a dedicated GitHub issue rather than stopping silently.
+
+The manager creates this issue automatically on first run:
+
+> **Agent Questions & Decisions** _(labeled `agent-questions`)_
+
+Each question is posted as a comment with full context: what's blocking, why a decision is needed, and options where applicable. To answer, simply comment on the issue. On next run the manager reads your reply, marks the question as resolved, and resumes work.
+
+```
+# Check for waiting questions
+gh issue list --label "agent-questions" --state open
+
+# Resume after answering
+@"manager (agent)" resume the backlog
+```
+
+Questions are posted in these situations:
+- **Ambiguous priority** — two issues are equally critical and the choice has architectural implications
+- **Scope question** — an issue's requirements are contradictory or need a design decision
+- **Fix cycle limit** — the coordinator tried 3 rounds of fixes and tests are still failing
+
 ## Lessons from Production Use
 
 These patterns emerged from real multi-agent projects:
