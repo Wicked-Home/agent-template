@@ -81,32 +81,9 @@ agent-template/
 
 ## How to Customize
 
-### 1. Run the initiator
+### 1. Install prerequisites (dolt + bd)
 
-The initiator handles initial project setup — it creates your domain agents from the `code-agent.md` template, fills in all placeholders, updates the coordinator routing table, and configures the test command in `test-writer.md` and `test-runner.md`. If you ran the design phase, it does all of this automatically from `project-context.md`. Otherwise it guides you through interactively.
-
-See `example-backend-api.md` for a reference of what a fully filled-in code agent looks like.
-
-### 2. Finish the test agents
-
-The initiator sets the test command automatically. What remains is project-specific content only the team can provide:
-
-Edit `test-writer.md`:
-- Replace the example edge cases with ones relevant to your domain
-- Update the test conventions section if your project has specific patterns
-
-Edit `test-runner.md`:
-- Add any project-specific validation scenarios beyond the standard suite
-
-### 3. Configure the auditor
-
-Edit `agent-auditor.md`:
-- Update the GitHub issue command if you use a PAT or different auth
-- Adjust source directories to match your project layout
-
-### 4. Install prerequisites (dolt + bd)
-
-`bd` (Beads) requires [Dolt](https://github.com/dolthub/dolt) as its storage backend.
+`bd` (Beads) requires [Dolt](https://github.com/dolthub/dolt) as its storage backend. Install both before running the initiator.
 
 **macOS:** `brew install dolt`
 
@@ -119,6 +96,35 @@ curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/insta
 ```
 
 The initiator handles `bd init --stealth` automatically — you don't need to run it manually.
+
+### 2. Run the initiator
+
+The initiator handles the rest of project setup automatically:
+- Creates domain agents from the `code-agent.md` template and fills in all placeholders
+- Updates the coordinator routing table
+- Configures the test command in `test-writer.md` and `test-runner.md`
+- Initialises bd and verifies git, GitHub access, and project structure
+
+If you ran the design phase first, it reads `.claude/project-context.md` and does all of this without prompting. Otherwise it guides you through interactively.
+
+See `example-backend-api.md` for a reference of what a fully filled-in code agent looks like.
+
+### 3. Finish the test agents
+
+The initiator sets the test command automatically. What remains is project-specific content only the team can provide:
+
+Edit `test-writer.md`:
+- Replace the example edge cases with ones relevant to your domain
+- Update the test conventions section if your project has specific patterns
+
+Edit `test-runner.md`:
+- Add any project-specific validation scenarios beyond the standard suite
+
+### 4. Configure the auditor
+
+Edit `agent-auditor.md`:
+- Update the GitHub issue command if you use a PAT or different auth
+- Adjust source directories to match your project layout
 
 ## Architecture
 
