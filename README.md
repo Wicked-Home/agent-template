@@ -114,7 +114,7 @@ Edit `agent-auditor.md`:
 Then install bd:
 
 ```bash
-pip install beads-cli
+curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/install.sh | bash
 ```
 
 The initiator handles `bd init --stealth` automatically — you don't need to run it manually.

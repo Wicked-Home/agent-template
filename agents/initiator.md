@@ -62,7 +62,7 @@ bd stats                     # Can it run?
 ```
 
 - If `dolt` command not found → FAIL, tell user to install Dolt first (`brew install dolt` on macOS, or the Linux install script from github.com/dolthub/dolt)
-- If `bd` command not found → FAIL, tell user to run `pip install beads-cli` after installing Dolt
+- If `bd` command not found → FAIL, tell user to run `curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/install.sh | bash` after installing Dolt
 - If bd not initialized in project → run `bd init --stealth`
 - If bd is healthy → PASS
 

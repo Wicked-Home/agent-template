@@ -125,9 +125,9 @@ if command -v bd &>/dev/null; then
 else
   if $dolt_ok; then
     fail "bd not found"
-    log "  Install: pip install beads-cli"
+    log "  Install: curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/install.sh | bash"
   else
-    warn "bd not found (install dolt first, then: pip install beads-cli)"
+    warn "bd not found (install dolt first, then run the beads install script)"
   fi
 fi
 
@@ -151,20 +151,15 @@ echo ""
 
 if ! $dolt_ok; then
   log "  1. Install dolt (see above)"
-  log "  2. pip install beads-cli"
-  log "  3. bd init --stealth"
-  log "  4. Customize .claude/agents/code-agent.md (see example-backend-api.md)"
-  log "  5. Update .claude/agents/coordinator.md agent routing table"
-  log "  6. In Claude Code: @\"initiator (agent)\" validate this project's setup"
+  log "  2. curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/install.sh | bash"
+  log "  3. Start a new Claude Code session"
+  log "  4. @\"initiator (agent)\" validate this project's setup"
 elif ! $bd_ok; then
-  log "  1. pip install beads-cli"
-  log "  2. bd init --stealth"
-  log "  3. Customize .claude/agents/code-agent.md (see example-backend-api.md)"
-  log "  4. Update .claude/agents/coordinator.md agent routing table"
-  log "  5. In Claude Code: @\"initiator (agent)\" validate this project's setup"
+  log "  1. curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/install.sh | bash"
+  log "  2. Start a new Claude Code session"
+  log "  3. @\"initiator (agent)\" validate this project's setup"
 else
-  log "  1. Customize .claude/agents/code-agent.md (see example-backend-api.md for reference)"
-  log "  2. Update the agent routing table in .claude/agents/coordinator.md"
-  log "  3. In Claude Code: @\"initiator (agent)\" validate this project's setup"
+  log "  1. Start a new Claude Code session"
+  log "  2. @\"initiator (agent)\" validate this project's setup"
 fi
 echo ""

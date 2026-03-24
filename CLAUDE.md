@@ -146,7 +146,7 @@ Verify: `dolt version`
 ### 2. Install bd (Beads)
 
 ```bash
-pip install beads-cli
+curl -fsSL https://raw.githubusercontent.com/steveyegge/beads/main/scripts/install.sh | bash
 ```
 
 Verify: `bd --version`
