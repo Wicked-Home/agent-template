@@ -83,19 +83,20 @@ agent-template/
 
 ### 1. Run the initiator
 
-The initiator handles initial project setup interactively — it will ask you what domain agents your project needs, create copies of `code-agent.md` for each, fill in the placeholders, and update the coordinator routing table automatically.
+The initiator handles initial project setup — it creates your domain agents from the `code-agent.md` template, fills in all placeholders, updates the coordinator routing table, and configures the test command in `test-writer.md` and `test-runner.md`. If you ran the design phase, it does all of this automatically from `project-context.md`. Otherwise it guides you through interactively.
 
 See `example-backend-api.md` for a reference of what a fully filled-in code agent looks like.
 
-### 2. Update the test agents
+### 2. Finish the test agents
+
+The initiator sets the test command automatically. What remains is project-specific content only the team can provide:
 
 Edit `test-writer.md`:
-- Replace the example edge cases with ones relevant to your project
-- Update the test conventions if you use something other than pytest
+- Replace the example edge cases with ones relevant to your domain
+- Update the test conventions section if your project has specific patterns
 
 Edit `test-runner.md`:
-- Update the test command if not using `python -m pytest`
-- Add any project-specific validation scenarios
+- Add any project-specific validation scenarios beyond the standard suite
 
 ### 3. Configure the auditor
 
