@@ -25,14 +25,13 @@ Then in any project session:
 
 Both do the same thing: copy agents, copy `workflow.md`, update `.gitignore`, check for dolt/bd, and print next steps.
 
-After install:
+After install, start a new Claude Code session (agents load at session start), then run:
 
-1. Customize `.claude/agents/code-agent.md` — use `example-backend-api.md` as a reference
-2. Update the routing table in `.claude/agents/coordinator.md`
-3. Start a new Claude Code session (agents load at session start), then run:
-   ```
-   @"initiator (agent)" validate this project's setup
-   ```
+```
+@"initiator (agent)" validate this project's setup
+```
+
+The initiator will guide you through creating your domain agents and updating the coordinator routing table.
 
 ## What's Included
 
@@ -62,29 +61,13 @@ agent-template/
 
 ## How to Customize
 
-### 1. Create your code agents
+### 1. Run the initiator
 
-`code-agent.md` is a template — copy it once per domain in your project. See `example-backend-api.md` for a fully filled-in reference. For example:
+The initiator handles initial project setup interactively — it will ask you what domain agents your project needs, create copies of `code-agent.md` for each, fill in the placeholders, and update the coordinator routing table automatically.
 
-```bash
-cp agents/code-agent.md agents/backend-api.md
-cp agents/code-agent.md agents/frontend-ui.md
-cp agents/code-agent.md agents/data-pipeline.md
-```
+See `example-backend-api.md` for a reference of what a fully filled-in code agent looks like.
 
-Then edit each copy:
-- Set the `name` and `description` in frontmatter
-- Fill in the domain context, responsibilities, and design constraints
-- Map it to the relevant GitHub Issues
-
-### 2. Update the coordinator
-
-Edit `coordinator.md`:
-- Update the agent table to list your actual code agents
-- Adjust the issue mappings
-- Set the model (`opus` / `sonnet` / `haiku`) based on task complexity needs
-
-### 3. Update the test agents
+### 2. Update the test agents
 
 Edit `test-writer.md`:
 - Replace the example edge cases with ones relevant to your project
@@ -94,22 +77,13 @@ Edit `test-runner.md`:
 - Update the test command if not using `python -m pytest`
 - Add any project-specific validation scenarios
 
-### 4. Run the initiator
-
-After copying the files, run the initiator to validate your project setup:
-```
-@"initiator (agent)" validate this project's setup
-```
-
-It checks project structure, git, GitHub access, bd, test framework, agent configuration, dependencies, and gitignore. It fixes what it can and reports what needs manual attention.
-
-### 5. Configure the auditor
+### 3. Configure the auditor
 
 Edit `agent-auditor.md`:
 - Update the GitHub issue command if you use a PAT or different auth
 - Adjust source directories to match your project layout
 
-### 6. Set up bd
+### 4. Set up bd
 
 ```bash
 cd /path/to/your-project

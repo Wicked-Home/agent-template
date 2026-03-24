@@ -105,9 +105,33 @@ For each agent file, check:
 - Referenced files in the body actually exist
 - `description` field is not the template default
 
-Categorize agents:
+**If `code-agent.md` has `{{...}}` placeholders (the base template is uncustomized):**
+
+Ask the user:
+> "What domain agents does this project need? Give me a comma-separated list of agent names (e.g., `backend-api, frontend-ui, data-pipeline`). I'll create a copy of `code-agent.md` for each and help you fill them in."
+
+For each domain name provided:
+1. Copy `.claude/agents/code-agent.md` to `.claude/agents/<domain-name>.md`
+2. Ask for each placeholder value in turn:
+   - `{{PROJECT_NAME}}` — "What is this project?" (one line)
+   - `{{DESCRIPTION}}` — "What does the `<domain-name>` agent do? Which issue numbers does it cover?"
+   - `{{CONTEXT}}` — "Describe the architecture and tech stack this agent works with."
+   - `{{RESPONSIBILITIES}}` — "List what this agent builds and maintains (numbered list)."
+   - `{{TEST_FRAMEWORK}}` — "What test framework? (e.g., pytest, jest, go test)"
+   - `{{TEST_COMMAND}}` — "What command runs the tests?"
+   - `{{CONSTRAINTS}}` — "Any design rules or conventions to enforce?"
+   - `{{REFERENCES}}` — "Any key docs or files to reference? (press Enter to skip)"
+3. Write the filled-in file: replace all `{{...}}` blocks with the provided values, remove all HTML comment blocks (`<!-- ... -->`), and set the frontmatter `name` to `<domain-name>` and `description` to the value provided for `{{DESCRIPTION}}`.
+
+Leave the original `code-agent.md` as-is — it is a reusable template for future domains.
+
+**If any other agent (not `code-agent.md`) has `{{...}}` placeholders:**
+List which placeholders remain and mark as **Template** — these require manual attention.
+
+Categorize agents in the report:
 - **Ready**: Fully configured, no placeholders
-- **Template**: Still has `{{...}}` placeholders — list which ones
+- **Created**: Newly generated from template this run
+- **Template**: Still has `{{...}}` placeholders
 - **Broken**: Missing frontmatter or invalid format
 
 ### 7. Coordinator routing
@@ -116,6 +140,10 @@ If `coordinator.md` exists, verify:
 - Every agent file in `.claude/agents/` is listed in the coordinator's routing table
 - No agents in the routing table are missing their `.md` file
 - Issue numbers (if any) don't reference issues that don't exist
+
+**If new domain agents were created in check #6**, add a row for each to the coordinator's routing table (the `<!-- UPDATE THIS TABLE -->` block in `coordinator.md`). Populate each row using the agent's `name` and `description` from its frontmatter. Status: FIXED.
+
+If the routing table still contains the placeholder `code-agent` row and domain-specific agents now exist, replace it with the new agent rows.
 
 ### 8. CLAUDE.md / project instructions
 
@@ -178,8 +206,8 @@ After all checks, produce:
 | 3 | GitHub access      | PASS   | repo: user/project             |
 | 4 | bd setup           | FIXED  | Ran bd init --stealth          |
 | 5 | Test framework     | PASS   | pytest, 42 tests collected     |
-| 6 | Agent files        | WARN   | 2 agents still have {{...}}    |
-| 7 | Coordinator routing| PASS   |                                |
+| 6 | Agent files        | FIXED  | Created backend-api.md, frontend-ui.md |
+| 7 | Coordinator routing| FIXED  | Added 2 agents to routing table |
 | 8 | Project config     | WARN   | No CLAUDE.md found             |
 | 9 | Dependencies       | PASS   |                                |
 |10 | Gitignore          | FIXED  | Added .beads/ to .gitignore    |
