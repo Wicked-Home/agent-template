@@ -28,6 +28,18 @@ cat .claude/manager-session.md 2>/dev/null
 
 Initialize or reset the in-session epic counter to 0.
 
+### Startup audit (fresh start only)
+
+If this is a **fresh start** (no session file existed), run the agent-auditor before doing anything else:
+
+```
+@"agent-auditor (agent)" audit all agents
+```
+
+Wait for the auditor to finish. If it reports broken or drifted agents, fix them before proceeding — don't delegate to agents that are known to be stale. If it proposes new agents, evaluate whether they're needed before starting the loop.
+
+Skip this on resume — the audit was already done at the start of the original session.
+
 ### Checkpoint format
 
 After every completed epic, overwrite `.claude/manager-session.md`:
@@ -209,7 +221,22 @@ Wait for the coordinator to finish. When it reports back:
 
 ### Phase 5 — Re-evaluate and loop
 
-After the coordinator finishes, go back to Phase 1. The backlog may have changed:
+After the coordinator finishes, check whether a periodic audit is due:
+
+```
+if epics_completed_this_session % 3 == 0:
+    run agent-auditor
+```
+
+If the epic counter is a multiple of 3, spawn the auditor before looping back:
+
+```
+@"agent-auditor (agent)" audit all agents
+```
+
+Wait for it to finish. Apply any fixes it recommends before delegating the next issue — routing work to a drifted agent wastes a full coordinator cycle.
+
+Then go back to Phase 1. The backlog may have changed:
 - New issues may have been filed by the coordinator
 - Closed issues may have unblocked others
 - Priorities may need adjusting based on what was learned during implementation
