@@ -97,9 +97,32 @@ Wait for the auditor to finish. If it reports broken or drifted agents, fix them
 
 Skip this on resume — the audit was already done at the start of the original session.
 
+### bd health check (every startup)
+
+After the audit (fresh start) or immediately on resume, check bd health and look for orphaned beads:
+
+```bash
+bd doctor                          # overall health
+bd list --status=in_progress       # any beads stuck in progress?
+```
+
+For each in-progress bead found:
+- Cross-reference with open GitHub issues and active branches (`git branch -a | grep epic/`)
+- If the parent issue is already closed → the coordinator was interrupted after completing but before cleanup. Close the bead:
+  ```bash
+  bd close <bead-id> "Closed by manager: parent issue already resolved"
+  ```
+- If the parent issue is still open and the branch exists → the coordinator was interrupted mid-work. Note this in the session file and prioritise the issue in Phase 2 so it gets picked back up.
+- If the parent issue is still open but no branch exists → the work was abandoned. Close the bead and let the coordinator start fresh:
+  ```bash
+  bd close <bead-id> "Closed by manager: no branch found, coordinator will restart"
+  ```
+
+Report any orphans found as a WARN in the session summary.
+
 ### Check for open questions (every startup)
 
-After the audit (fresh start) or immediately on resume, find or create the questions issue and check for unanswered questions:
+After the bd health check, find or create the questions issue and check for unanswered questions:
 
 ```bash
 gh issue list --label "agent-questions" --state open --json number,title --limit 1
@@ -285,6 +308,14 @@ Wait for the coordinator to finish. When it reports back:
 - Confirm the GitHub issue was closed
 - Note any follow-up issues the coordinator filed
 - Check if any open issues were affected (unblocked, scope changed, etc.)
+- Verify the bd epic for this issue was closed:
+  ```bash
+  bd list --external-ref "gh-<number>"
+  ```
+  If any beads for this issue are still open or in-progress, close them:
+  ```bash
+  bd close <bead-id> "Closed by manager: GH#<number> resolved"
+  ```
 
 ---
 
@@ -297,13 +328,18 @@ if epics_completed_this_session % 3 == 0:
     run agent-auditor
 ```
 
-If the epic counter is a multiple of 3, spawn the auditor before looping back:
+If the epic counter is a multiple of 3, run the auditor and a bd health check before looping back:
 
 ```
 @"agent-auditor (agent)" audit all agents
 ```
 
-Wait for it to finish. Apply any fixes it recommends before delegating the next issue — routing work to a drifted agent wastes a full coordinator cycle.
+```bash
+bd doctor
+bd list --status=in_progress    # catch any new orphans
+```
+
+Wait for the auditor to finish. Apply any fixes it recommends before delegating the next issue — routing work to a drifted agent wastes a full coordinator cycle. Resolve any orphaned beads using the same logic as the startup health check.
 
 Then go back to Phase 1. The backlog may have changed:
 - New issues may have been filed by the coordinator
@@ -318,7 +354,13 @@ Continue the loop until a stop condition is met.
 
 Stop the loop and report to the user when:
 
-1. **Backlog empty** — no open issues remain. Delete `.claude/manager-session.md` and report a full summary.
+1. **Backlog empty** — no open issues remain. Run a full bd cleanup before reporting:
+   ```bash
+   bd list --status=in_progress    # close any remaining in-progress beads
+   bd list --status=open           # close any open beads with no parent issue
+   bd doctor                       # verify db health
+   ```
+   Then delete `.claude/manager-session.md` and report a full summary.
 2. **All remaining issues blocked or incomplete** — list what's blocked and why, what information is needed.
 3. **Coordinator escalated** — the coordinator hit its 3-cycle fix limit and posted a question to the questions issue. Surface the issue link and pause.
 4. **Ambiguous priority** — two issues seem equally critical and the choice between them has architectural implications. Post the question to the questions issue, then stop and tell the user to answer it before resuming.
@@ -362,3 +404,4 @@ State saved in: .claude/manager-session.md
 9. **Check capacity before every delegation.** If estimated remaining turns are below 20, finish the current epic and wrap up. Never start an epic you can't finish.
 10. **Wrap up cleanly, not abruptly.** If capacity is low, finish the issue in progress, write the checkpoint, produce the session summary, and give the resume command. Don't just stop mid-loop.
 11. **Route all decisions through the questions issue.** Never stop silently on a decision point. Always post to the questions issue first so the user has a clear, persistent record of what's waiting for their input.
+12. **Keep bd clean.** Orphaned beads indicate interrupted work or bugs. Resolve them immediately — don't leave stale in-progress beads accumulating across sessions.
