@@ -71,7 +71,7 @@ agent-template/
     ├── design-planner.md           ← Reads finished design.md, creates GitHub issue backlog
     ├── initiator.md                ← Bootstraps + validates project setup (run first)
     ├── manager.md                  ← Triages backlog, sets priorities, drives hands-off loop
-    ├── coordinator.md              ← Orchestrates build → test → fix loop (one epic)
+    ├── coordinator.md              ← Orchestrates build → test → fix loop for one GitHub issue
     ├── code-agent.md               ← Template for domain-specific code agents
     ├── example-backend-api.md      ← Filled-in example of code-agent.md (Python/FastAPI)
     ├── test-writer.md              ← Reviews coverage, writes edge case tests
@@ -151,11 +151,11 @@ The initiator handles `bd init --stealth` automatically — you don't need to ru
                    ┌──────────────┐        ┌────────────────┐
                    │   manager    │───────▶│ agent-auditor  │
                    └──────┬───────┘        └────────────────┘
-                          │  invokes on startup + every 3 epics
+                          │  invokes on startup + every 3 issues
                           │ one issue at a time
                           ▼
                    ┌──────────────┐
-                   │ coordinator  │  ← orchestrates one epic end-to-end
+                   │ coordinator  │  ← implements one GitHub issue end-to-end
                    └──────┬───────┘
                           │
             ┌─────────────┼──────────────┐
@@ -205,4 +205,4 @@ These patterns emerged from real multi-agent projects:
 - **Coordinator interruptions leave orphans.** If you interrupt the coordinator, its child agents may still complete in the background. Check `bd list --status=in_progress` and clean up stale beads.
 - **Share issue ownership sparingly.** When two agents must share an issue (e.g., boot integration touching both state machine and config), note it explicitly in both agents and the coordinator table.
 - **Mark completed issues in descriptions.** Use a pattern like `(done: #1, #3, #5)` in agent descriptions so it's clear what's active vs. historical context.
-- **The manager runs the auditor automatically.** It audits on fresh start and every 3 completed epics — you don't need to invoke it manually unless something looks off.
+- **The manager runs the auditor automatically.** It audits on fresh start and every 3 completed issues — you don't need to invoke it manually unless something looks off.
