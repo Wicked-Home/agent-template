@@ -152,6 +152,21 @@ For each domain name provided:
 
 Leave the original `code-agent.md` as-is — it is a reusable template for future domains.
 
+**After creating domain agents (both Path A and Path B), update test-writer and test-runner:**
+
+Determine the project's test framework and test command:
+- If using Path A: read from the first domain agent's `**Test framework:**` and `**Test command:**` fields in `project-context.md`
+- If using Path B: use the values the user provided for `{{TEST_FRAMEWORK}}` and `{{TEST_COMMAND}}`
+- If all domain agents share the same test command, use it. If they differ, use the most common one and note the others.
+
+Then update `.claude/agents/test-writer.md`:
+- Replace the hardcoded `python3 -m pytest --tb=short -q` in the "How to work" step 6 with the actual test command
+
+And update `.claude/agents/test-runner.md`:
+- Replace the entire `<!-- UPDATE THIS SECTION -->` code block under "How to run tests" with commands using the actual test framework and test command. Keep the same structure (full suite, specific file, coverage) but adapted to the detected framework.
+
+Status: FIXED for both if updated, WARN if test command could not be determined.
+
 **If any other agent (not `code-agent.md`) has `{{...}}` placeholders:**
 List which placeholders remain and mark as **Template** — these require manual attention.
 
@@ -233,7 +248,7 @@ After all checks, produce:
 | 3 | GitHub access      | PASS   | repo: user/project             |
 | 4 | bd setup           | FIXED  | Ran bd init --stealth          |
 | 5 | Test framework     | PASS   | pytest, 42 tests collected     |
-| 6 | Agent files        | FIXED  | Created backend-api.md, frontend-ui.md (from project-context.md) |
+| 6 | Agent files        | FIXED  | Created backend-api.md, frontend-ui.md; updated test-writer + test-runner |
 | 7 | Coordinator routing| FIXED  | Added 2 agents to routing table |
 | 8 | Project config     | WARN   | No CLAUDE.md found             |
 | 9 | Dependencies       | PASS   |                                |
