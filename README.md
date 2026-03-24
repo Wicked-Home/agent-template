@@ -103,14 +103,21 @@ Edit `agent-auditor.md`:
 - Update the GitHub issue command if you use a PAT or different auth
 - Adjust source directories to match your project layout
 
-### 4. Set up bd
+### 4. Install prerequisites (dolt + bd)
+
+`bd` (Beads) requires [Dolt](https://github.com/dolthub/dolt) as its storage backend.
+
+**macOS:** `brew install dolt`
+
+**Linux:** `curl -L https://github.com/dolthub/dolt/releases/latest/download/install.sh | bash`
+
+Then install bd:
 
 ```bash
-cd /path/to/your-project
-bd init --stealth
+pip install beads-cli
 ```
 
-The workflow doc and all agents reference bd commands. If your project has a different bd prefix, the commands will work automatically — bd uses whatever prefix was configured at init.
+The initiator handles `bd init --stealth` automatically — you don't need to run it manually.
 
 ## Architecture
 
@@ -131,18 +138,19 @@ The workflow doc and all agents reference bd commands. If your project has a dif
                              │
                              ▼
                    ┌─────────────────┐
-                   │  design-planner │  ← design.md → GitHub issues
+                   │  design-planner │  ← design.md → GitHub issues + project-context.md
                    └────────┬────────┘
                             │
                             ▼
                    ┌──────────────┐
-                   │  initiator   │  ← validate tooling (run once)
+                   │  initiator   │  ← validate tooling, create domain agents (run once)
                    └──────┬───────┘
                           │
                           ▼
-                   ┌──────────────┐
-                   │   manager    │  ← triage → prioritize → delegate → repeat
-                   └──────┬───────┘
+                   ┌──────────────┐        ┌────────────────┐
+                   │   manager    │───────▶│ agent-auditor  │
+                   └──────┬───────┘        └────────────────┘
+                          │  invokes on startup + every 3 epics
                           │ one issue at a time
                           ▼
                    ┌──────────────┐
@@ -159,10 +167,6 @@ The workflow doc and all agents reference bd commands. If your project has a dif
                           │
                   Fails? ─┤── fix loop (max 3×)
                   No → PR + report back to manager
-
-    ┌────────────────┐
-    │ agent-auditor  │  ← periodic: keeps agent definitions current
-    └────────────────┘
 ```
 
 ## Invoking
@@ -200,4 +204,4 @@ These patterns emerged from real multi-agent projects:
 - **Coordinator interruptions leave orphans.** If you interrupt the coordinator, its child agents may still complete in the background. Check `bd list --status=in_progress` and clean up stale beads.
 - **Share issue ownership sparingly.** When two agents must share an issue (e.g., boot integration touching both state machine and config), note it explicitly in both agents and the coordinator table.
 - **Mark completed issues in descriptions.** Use a pattern like `(done: #1, #3, #5)` in agent descriptions so it's clear what's active vs. historical context.
-- **Run the auditor periodically.** After every few issues, run `agent-auditor` to catch stale references, unassigned issues, and drift between agents and the coordinator's routing table.
+- **The manager runs the auditor automatically.** It audits on fresh start and every 3 completed epics — you don't need to invoke it manually unless something looks off.
