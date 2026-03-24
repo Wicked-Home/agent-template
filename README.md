@@ -4,24 +4,6 @@ A reusable multi-agent system with a coordinator, specialized code agents, test 
 
 ## Quick Start
 
-### Step 0 — Design (optional but recommended)
-
-If you're starting from an idea rather than an existing codebase, run the design phase first. This produces a `design.md` and a GitHub issue backlog, and writes a `.claude/project-context.md` file that the initiator uses to configure your agents automatically.
-
-```
-@"design-facilitator (agent)" I want to build <your idea>
-```
-
-The facilitator runs three specialist agents (product, architect, critic) in debate, then synthesizes their output into `design.md`. Once the design is done:
-
-```
-@"design-planner (agent)" read design.md and create issues
-```
-
-The planner creates your GitHub issue backlog and writes `.claude/project-context.md`.
-
----
-
 ### Step 1 — Install
 
 **From a terminal** — run this in your project folder:
@@ -45,9 +27,25 @@ Then in any project session:
 
 Both do the same thing: copy agents, copy `workflow.md`, update `.gitignore`, check for dolt/bd, and print next steps.
 
-### Step 2 — Bootstrap
+### Step 2 — Design (optional but recommended)
 
-Start a new Claude Code session (agents load at session start), then run:
+Start a new Claude Code session, then run the design phase. This produces a `design.md` and a GitHub issue backlog, and writes `.claude/project-context.md` — which the initiator uses to configure your agents automatically in the next step.
+
+```
+@"design-facilitator (agent)" I want to build <your idea>
+```
+
+The facilitator runs three specialist agents (product, architect, critic) in debate, then synthesizes their output into `design.md`. Once the design is done:
+
+```
+@"design-planner (agent)" read design.md and create issues
+```
+
+The planner creates your GitHub issue backlog and writes `.claude/project-context.md`.
+
+### Step 3 — Bootstrap
+
+In the same session (or a new one), run:
 
 ```
 @"initiator (agent)" validate this project's setup
