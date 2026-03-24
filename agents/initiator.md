@@ -107,7 +107,34 @@ For each agent file, check:
 
 **If `code-agent.md` has `{{...}}` placeholders (the base template is uncustomized):**
 
-Ask the user:
+First, check whether `.claude/project-context.md` exists:
+
+```bash
+ls .claude/project-context.md 2>/dev/null
+```
+
+**Path A — context file exists (written by design-planner):**
+
+Read `.claude/project-context.md` and use it to create domain agents automatically, with no user interaction. For each domain agent defined in the file:
+
+1. Copy `.claude/agents/code-agent.md` to `.claude/agents/<agent-name>.md`
+2. Fill in placeholders using the context file:
+   - `{{PROJECT_NAME}}` ← `**Project:**` field
+   - `{{DESCRIPTION}}` ← agent's `**Description:**` field
+   - `{{CONTEXT}}` ← `## Tech stack` section (shared across all agents)
+   - `{{RESPONSIBILITIES}}` ← agent's `**Responsibilities:**` list
+   - `{{TEST_FRAMEWORK}}` ← agent's `**Test framework:**` field
+   - `{{TEST_COMMAND}}` ← agent's `**Test command:**` field
+   - `{{CONSTRAINTS}}` ← agent's `**Constraints:**` list, plus any entries from `## Shared constraints`
+   - `{{REFERENCES}}` ← agent's `**References:**` list, plus any entries from `## Shared references`
+3. Write the filled-in file: replace all `{{...}}` blocks, remove all HTML comment blocks (`<!-- ... -->`), and set the frontmatter `name` to `<agent-name>` and `description` to the value used for `{{DESCRIPTION}}`.
+4. If any placeholder has no corresponding data in the context file, substitute a clearly marked placeholder like `TODO: <field name>` and note it in the report.
+
+Status: FIXED (list each agent created, note any TODO fields).
+
+**Path B — no context file (design-planner was not run):**
+
+Fall back to interactive mode. Ask the user:
 > "What domain agents does this project need? Give me a comma-separated list of agent names (e.g., `backend-api, frontend-ui, data-pipeline`). I'll create a copy of `code-agent.md` for each and help you fill them in."
 
 For each domain name provided:
@@ -206,7 +233,7 @@ After all checks, produce:
 | 3 | GitHub access      | PASS   | repo: user/project             |
 | 4 | bd setup           | FIXED  | Ran bd init --stealth          |
 | 5 | Test framework     | PASS   | pytest, 42 tests collected     |
-| 6 | Agent files        | FIXED  | Created backend-api.md, frontend-ui.md |
+| 6 | Agent files        | FIXED  | Created backend-api.md, frontend-ui.md (from project-context.md) |
 | 7 | Coordinator routing| FIXED  | Added 2 agents to routing table |
 | 8 | Project config     | WARN   | No CLAUDE.md found             |
 | 9 | Dependencies       | PASS   |                                |

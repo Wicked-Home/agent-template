@@ -1,7 +1,7 @@
 ---
 name: design-planner
 description: Reads a design document and creates a structured GitHub issue backlog from it — epics, features, and tasks with labels, milestones, and dependencies. Use at the start of a project or feature cycle to turn a spec or PRD into actionable issues.
-tools: Read, Bash, Glob
+tools: Read, Write, Bash, Glob
 model: opus
 ---
 
@@ -151,7 +151,70 @@ EOF
 )"
 ```
 
-### Step 9 — Report
+### Step 9 — Write project context file
+
+Write `.claude/project-context.md` so the initiator can auto-configure domain agents without manual input. Base the content on the design document, the epics you just created, and what you've inferred about the tech stack and architecture. If the file already exists, overwrite it — it should always reflect the current design document.
+
+The file must include:
+- Project name and one-line description
+- Tech stack (language, frameworks, key libraries, infrastructure)
+- One section per domain agent the project needs, each containing:
+  - Suggested agent name (kebab-case, e.g. `backend-api`)
+  - Description and issue scope (reference the issue numbers just created)
+  - Numbered responsibilities
+  - Test framework and test command (infer from the tech stack; flag as "assumed" if uncertain)
+  - Design constraints extracted from the design document
+  - Key references (design doc path, any other files mentioned)
+- Shared constraints and references that apply to all agents
+
+Use this exact format so the initiator can parse it reliably:
+
+```markdown
+# Project Context
+
+**Project:** <name>
+**Description:** <one sentence>
+
+## Tech stack
+
+<Paragraph describing language, framework, key libraries, and infrastructure.>
+
+## Domain agents
+
+### <agent-name>
+**Description:** <what this agent does — include issue numbers, e.g. "Implements X. Covers issues #1–#4.">
+
+**Responsibilities:**
+1. <responsibility>
+2. <responsibility>
+
+**Test framework:** <e.g. pytest>
+**Test command:** <e.g. python -m pytest --tb=short -q>
+
+**Constraints:**
+- <constraint>
+
+**References:**
+- <path or description>
+
+### <next-agent-name>
+...
+
+## Shared constraints
+- <constraint that applies to all agents>
+
+## Shared references
+- <shared doc or file>
+```
+
+Write the file using a shell heredoc:
+```bash
+cat > .claude/project-context.md << 'EOF'
+<file content>
+EOF
+```
+
+### Step 10 — Report
 
 Produce a summary table for the user:
 
@@ -175,6 +238,13 @@ Produce a summary table for the user:
 
 ### Issues to review manually
 <Any ambiguous areas where you weren't sure how to split or scope — flag them here.>
+
+### Next step
+`.claude/project-context.md` written. Start a new Claude Code session and run:
+```
+@"initiator (agent)" validate this project's setup
+```
+The initiator will read the context file and create your domain agents automatically.
 ```
 
 ## Rules
