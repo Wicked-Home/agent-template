@@ -115,7 +115,36 @@ bd create "Fix: <failure description>" -t task -p 1 --parent <epic-id>
 bd update <fix-task-id> --claim
 ```
 
-After the fix, run `test-runner` again. Repeat until green. Maximum 3 fix cycles — if still failing after 3 rounds, stop and report the situation to the user with a clear summary of what's passing, what's failing, and why.
+After the fix, run `test-runner` again. Repeat until green. Maximum 3 fix cycles — if still failing after 3 rounds, post a question to the questions issue and stop:
+
+```bash
+# Find the questions issue
+gh issue list --label "agent-questions" --state open --json number,title --limit 1
+
+# Post the escalation
+gh issue comment <questions-issue-number> --body "$(cat <<'EOF'
+### [OPEN] #<issue-number> — Fix cycle limit reached: <failure description>
+
+**Blocking:** #<issue-number> (<priority>) — <issue title>
+**Context:** The coordinator ran 3 fix cycles on this issue and tests are still failing. Human input is needed before work can continue.
+**Failing tests:** <list of failing test names>
+**Last error:**
+\`\`\`
+<paste the relevant error output>
+\`\`\`
+**What was tried:**
+1. <fix attempt 1>
+2. <fix attempt 2>
+3. <fix attempt 3>
+
+**Question:** How should this be resolved? Options: investigate the root cause manually, revise the approach, or descope the failing scenario.
+
+_Asked by coordinator · <date>_
+EOF
+)"
+```
+
+Then report the questions issue link to the manager so it can surface it to the user.
 
 When green:
 ```bash

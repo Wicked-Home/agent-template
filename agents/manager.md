@@ -28,6 +28,63 @@ cat .claude/manager-session.md 2>/dev/null
 
 Initialize or reset the in-session epic counter to 0.
 
+### Questions issue
+
+The questions issue is a persistent GitHub issue labeled `agent-questions` that serves as the communication channel between the agent system and the user. Agents post questions here when they need a human decision before work can proceed. The user answers by commenting on the issue.
+
+**Finding or creating the issue:**
+```bash
+# Check if it exists
+gh issue list --label "agent-questions" --state open --json number,title --limit 1
+
+# Create if missing
+gh issue create \
+  --title "Agent Questions & Decisions" \
+  --label "agent-questions" \
+  --body "$(cat <<'EOF'
+This issue is managed by the agent system. When an agent needs human input before work can proceed, it posts a question here as a comment.
+
+**To answer:** Reply to this issue with your answer — include the question number or a quote so it's clear what you're responding to. The manager will read your answer on next run and resume work.
+EOF
+)"
+```
+
+Store the issue number for use throughout the session.
+
+**Posting a question:**
+```bash
+gh issue comment <questions-issue-number> --body "$(cat <<'EOF'
+### [OPEN] #<issue-number> — <short question title>
+
+**Blocking:** #<issue-number> (<priority>) — <issue title>
+**Context:** <why this question arose and what's at stake>
+**Question:** <the specific decision needed>
+**Options** _(if applicable)_:
+- Option A: <description and tradeoff>
+- Option B: <description and tradeoff>
+
+_Asked by manager · <date>_
+EOF
+)"
+```
+
+**Marking a question as answered** (after reading the user's reply):
+```bash
+gh issue comment <questions-issue-number> --body "### [ANSWERED] #<issue-number> — <short question title>
+
+**Decision:** <what the user said>
+
+_Answered · <date>_"
+```
+
+**Checking for open questions:**
+```bash
+gh issue view <questions-issue-number> --comments --json comments \
+  | grep -c '\[OPEN\]'
+```
+
+If there are open questions, read the full comment thread to understand which questions are still waiting and which have been answered by user replies. A question is answered when a user comment follows it in the thread.
+
 ### Startup audit (fresh start only)
 
 If this is a **fresh start** (no session file existed), run the agent-auditor before doing anything else:
@@ -39,6 +96,18 @@ If this is a **fresh start** (no session file existed), run the agent-auditor be
 Wait for the auditor to finish. If it reports broken or drifted agents, fix them before proceeding — don't delegate to agents that are known to be stale. If it proposes new agents, evaluate whether they're needed before starting the loop.
 
 Skip this on resume — the audit was already done at the start of the original session.
+
+### Check for open questions (every startup)
+
+After the audit (fresh start) or immediately on resume, find or create the questions issue and check for unanswered questions:
+
+```bash
+gh issue list --label "agent-questions" --state open --json number,title --limit 1
+```
+
+If open questions exist — read the full comment thread. For each `[OPEN]` question, check whether a user comment follows it in the thread:
+- **User has replied** → mark as `[ANSWERED]`, note the decision in the session file, and proceed
+- **No reply yet** → stop. Tell the user which questions are waiting and provide the issue link. Do not start the loop until all open questions are answered.
 
 ### Checkpoint format
 
@@ -251,9 +320,9 @@ Stop the loop and report to the user when:
 
 1. **Backlog empty** — no open issues remain. Delete `.claude/manager-session.md` and report a full summary.
 2. **All remaining issues blocked or incomplete** — list what's blocked and why, what information is needed.
-3. **Coordinator escalated** — the coordinator hit its 3-cycle fix limit and needs human input. Surface the failure clearly and pause.
-4. **Ambiguous priority** — two issues seem equally critical and the choice between them has architectural implications. Present the tradeoff and ask.
-5. **Scope question** — an issue's requirements are contradictory or impossible to satisfy without a design decision. Flag it and pause.
+3. **Coordinator escalated** — the coordinator hit its 3-cycle fix limit and posted a question to the questions issue. Surface the issue link and pause.
+4. **Ambiguous priority** — two issues seem equally critical and the choice between them has architectural implications. Post the question to the questions issue, then stop and tell the user to answer it before resuming.
+5. **Scope question** — an issue's requirements are contradictory or impossible to satisfy without a design decision. Post the question to the questions issue, then stop and tell the user to answer it before resuming.
 6. **Session capacity low** — fewer than 10 turns estimated remaining. Wrap up cleanly (see capacity check above).
 
 When stopping, always produce a status report and write the final checkpoint:
@@ -292,3 +361,4 @@ State saved in: .claude/manager-session.md
 8. **Checkpoint after every coordinator return.** Write `.claude/manager-session.md` immediately after the coordinator finishes — before starting triage for the next issue. Never skip this.
 9. **Check capacity before every delegation.** If estimated remaining turns are below 20, finish the current epic and wrap up. Never start an epic you can't finish.
 10. **Wrap up cleanly, not abruptly.** If capacity is low, finish the issue in progress, write the checkpoint, produce the session summary, and give the resume command. Don't just stop mid-loop.
+11. **Route all decisions through the questions issue.** Never stop silently on a decision point. Always post to the questions issue first so the user has a clear, persistent record of what's waiting for their input.
