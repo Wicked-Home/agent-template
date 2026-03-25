@@ -12,6 +12,16 @@ A reusable multi-agent system with a coordinator, specialized code agents, test 
 curl -fsSL https://raw.githubusercontent.com/Wicked-Home/agent-template/main/install.sh | bash
 ```
 
+### Updating existing projects
+
+After making changes to this repo, push to GitHub then run in each target project:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Wicked-Home/agent-template/main/update.sh | bash
+```
+
+This overwrites all standard agents. `code-agent.md` is skipped by default since it's customized per project — add `-- --include-code-agent` to overwrite it too.
+
 **From inside a Claude Code session** — add the `/add-agents` command once to your global commands:
 
 ```bash
@@ -59,6 +69,7 @@ If you ran the design phase, the initiator reads `.claude/project-context.md` an
 agent-template/
 ├── README.md                       ← You are here
 ├── install.sh                      ← One-command installer (curl | bash)
+├── update.sh                       ← Update agents in existing projects (curl | bash)
 ├── workflow.md                     ← Full workflow doc (bd + GitHub + coordinator cycle)
 ├── .claude/
 │   └── commands/
